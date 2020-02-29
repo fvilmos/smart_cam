@@ -1,0 +1,28 @@
+#url contains the http address whre the camera still images are rendered
+url=http://192.168.1.70/Streaming/Channels/1/picture
+url=http://192.168.1.71/Streaming/Channels/1/picture
+url=http://192.168.1.72/Streaming/Channels/1/picture
+
+#user and password is used in case the camera image can be accesses only with credimonials
+user=XXX
+password=XXX
+
+#use balcklist to skip specific label detection. i.e. tvmonitor detection not relavat
+blacklist=background,tvmonitor,aeroplane,boat,diningtable,chair,sofa,train,pottedplant,bottle,cat
+
+#net and weights are keeping the lin to the dnn specific files
+net=./model/mobilenet-ssd.xml
+weights=./model/mobilenet-ssd.bin
+
+#target can be ncs or cpu, secound will use CPU power for dnn
+target=ncs
+
+#save detections
+savedetections=1
+
+#save raw image, usefull for collecting false positives for retrain
+saveraw=1
+
+#show command line information on detection, usefull when testing on the RPi target
+showinfo=1
+
