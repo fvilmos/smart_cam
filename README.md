@@ -9,9 +9,8 @@ The project brings the usual IP cameras to the next level, adding deep neuronal 
 </p>
 
 ### Configuration file
-```
+
 Before usage, the configuration file parameters must be adjusted to the needs (i.e. IP address of the cameras, ONVIF address to grab a picture, right credentials must be entered). Take a look in ./config.txt file
-```
 
 ### Command line parameters
 
