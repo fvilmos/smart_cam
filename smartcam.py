@@ -188,7 +188,7 @@ class clDetectionProcessor():
                     dtStr = 'cam' + str(id) + '_' + now.strftime("%Y%m%d_%H%M%S")
 
                     if saveRaw > 0:
-                        cv2.imwrite('./detections/' + dtStr + '.png', frame)
+                        cv2.imwrite('./detections/' + dtStr + '.jpg', frame)
 
                     # draw boxes and markers
                     cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color=(0, 255, 0))
@@ -201,7 +201,7 @@ class clDetectionProcessor():
                         print(dtStr + "," + labelStr)
 
                     if saveLabeled > 0:
-                        cv2.imwrite('./detections/' + dtStr + "_an" + '.png', frame)
+                        cv2.imwrite('./detections/' + dtStr + "_an" + '.jpg', frame)
 
                     return dtStr,labelStr,frame
 
