@@ -40,7 +40,7 @@ Requirements:
 - Intel TM Movidius Neuronal [Compute Stick](https://software.intel.com/en-us/articles/intel-movidius-neural-compute-stick)
 - (optional) USB3.0 M.2 SSD 
 - 16/32 Gb SSD card
-- Openvino + OpenCV installaion [2019R31](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_raspbian.html#workflow-for-raspberry-pi), note: I had troubles with using the latest version, therefore use the recommanded one.
+- Openvino + OpenCV installaion [2019R31](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_raspbian.html#workflow-for-raspberry-pi), note: I had troubles using the latest version (model generated on PC with Model Optimizer was not working on RPi4).
 - (optional) [ncappzoo](https://github.com/movidius/ncappzoo) for additional models and gideline for Model Optimizer installation (MO) on RPi4. The recommandation is to use a PC (instead Rpi4) with Openvino intallation to transform and optimize state-of-the-art models, then deplyoy on RPi4. 
 - To grab the pictures from IP cameras the 'requests' pip package was intalled.
 
