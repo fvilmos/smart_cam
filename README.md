@@ -44,7 +44,7 @@ Requirements:
 - To grab the pictures from IP cameras the 'requests' pip package was intalled.
 
 <p align="center"> 
-<img src="https://github.com/fvilmos/smart_cam/images/rpi4ncs.jpg" alt="400" width="400"></a>
+<img src="./images/rpi4ncs.jpg" alt="400" width="400"></a>
 </p>
 
 ### Running the application on RPi4 startup
@@ -89,11 +89,9 @@ Now, start the service to test it.
 sudo systemctl start smart_cam.service
 ```
 If everiting is fine, you will see something like this:
-
 <p align="center"> 
-<img src="https://github.com/fvilmos/smart_cam/images/rpi4ncs.jpg" alt="400" width="400"></a>
+<img src="./images/service.jpg" alt="400" width="400"></a>
 </p>
-
 Now, it can be enabled to start on boot time:
 ```
 sudo systemctl enable smart_cam.service
