@@ -93,6 +93,7 @@ If everiting is fine, you will see something like this:
 <img src="./images/service.jpg" alt="400"></a>
 </p>
 Now, it can be enabled to start on boot time:
+
 ```
 sudo systemctl enable smart_cam.service
 ```
