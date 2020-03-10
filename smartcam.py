@@ -75,7 +75,7 @@ class clFileProcessor():
         '''
 
         # config file schema format
-        cdict = {'url':[], 'user':[],'password':[], 'blacklist':[], 'net':[], 'weights':[],'target':[],'savedetections':[],'saveraw':[],'showinfo':[]}
+        cdict = {'url':[], 'user':[],'password':[], 'blacklist':[], 'net':[], 'weights':[],'target':[],'savedetections':[],'saveraw':[],'showinfo':[],'netw':[],'neth':[]}
 
         # load file
         ll = self.LoadList(file)
@@ -162,6 +162,9 @@ class clDetectionProcessor():
         :return: timestanp, detection and conficence, image
         '''
 
+        dtStr = ""
+        labelStr = ""
+
         # process results
         for detection in dnnOut.reshape(-1, 7):
 
@@ -203,7 +206,7 @@ class clDetectionProcessor():
                     if saveLabeled > 0:
                         cv2.imwrite('./detections/' + dtStr + "_an" + '.jpg', frame)
 
-                    return dtStr,labelStr,frame
+        return dtStr,labelStr,frame
 
 def main():
 
@@ -234,6 +237,8 @@ def main():
     sdet = int(cff['savedetections'][0])
     sraw = int(cff['saveraw'][0])
     sinfo = int(cff['showinfo'][0])
+    netw = int(cff['netw'][0])
+    neth = int(cff['neth'][0])
 
     # load labels, if file available
     if args.l:
@@ -247,7 +252,7 @@ def main():
     ipcam = clIpCamera(args.cam)
 
     # create net
-    dnn = clDnnHandler(netbin, weights,target=target)
+    dnn = clDnnHandler(netbin, weights,target=target,netsize=(netw,neth))
 
     # image processor
     imgProcessor = clDetectionProcessor(args.conf)

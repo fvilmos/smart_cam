@@ -8,20 +8,25 @@ user=XXX
 password=XXX
 
 #use balcklist to skip specific label detection. i.e. tvmonitor detection not relavat
-blacklist=background,tvmonitor,aeroplane,boat,diningtable,chair,sofa,train,pottedplant,bottle,cat
+#blacklist=background,tvmonitor,aeroplane,boat,diningtable,chair,sofa,train,pottedplant,bottle,cat
+blacklist=[]
 
 #net and weights are keeping the lin to the dnn specific files
 net=./model/mobilenet-ssd.xml
 weights=./model/mobilenet-ssd.bin
 
+# network input layer shape/ size w,h
+netw=128
+neth=128
+
 #target can be ncs or cpu, secound will use CPU power for dnn
-target=ncs
+target=cpu
 
 #save detections
-savedetections=1
+savedetections=0
 
 #save raw image, usefull for collecting false positives for retrain
-saveraw=1
+saveraw=0
 
 #show command line information on detection, usefull when testing on the RPi target
 showinfo=1
