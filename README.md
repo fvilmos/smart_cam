@@ -18,6 +18,7 @@ Before usage, the configuration file parameters must be adjusted to the needs (i
 python3 ./smartcam.py --help
 usage: smartcam.py [-h] [-cam camera] [-l labelfile] -c config
                    [-s showdetections] [-conf confidence] [-si showcmdinfo]
+                   [-img loadimage] [-server servdata]
 
 optional arguments:
   -h, --help         show this help message and exit
@@ -29,7 +30,9 @@ optional arguments:
   -s showdetections  show/ hide detection window [0,1], default=0
   -conf confidence   confidence value [0.0 - 1.0], default=0.8
   -si showcmdinfo    show cmd line info on detection, default=False
-
+  -img loadimage     load an image, provide the path like ./test.jpg
+  -server servdata   Use the selected server to publish detections [http,
+                     mqtt, all], must be configured in config file.
 ```
 
 ## Running on Raspberry Pi4 with Openvino and NCS v1
@@ -101,6 +104,75 @@ sudo systemctl enable smart_cam.service
 ## Running on PC
 
 To run on a PC, the above mentioned requirements are valid. Openvino with OpenCV. Here for testing purposes, the 'target' atribut from the configuration file could be settled to 'cpu' mode. USB camera (if atteched), can be invoked easily with the command line parameter.
+
+## IOT integration
+
+Thre are two methods provided to integrate in an IOT system:
+- http server - servs the detections
+- mqtt client - sends images to an mqtt broker
+
+Both can work together, the http server is usefull to verify easily the detections, responds to GET requests, so refresh is needed after detections.
+If the chooesen option is the mqtt client, additional package is needed to be intalled. Recommanded is to use the [Paho MQTT Python Client](http://www.steves-internet-guide.com/into-mqtt-python-client/). The advantage using mqtt, is that additional information is provided beside the picture with detections: 
+- status - indicates if the sensor is alive
+- labels - detection and detection accuracy is available in a string format - provideing more posibilities to filter the topic of interest
+- picture with detection (same as with http solution)
+
+Before use this features, additional configuration si needed in the config.txt file:
+```
+#set mqtt connection parameters
+mqttbroker=<smart_cam IP>
+mqttport=1883
+mqttstatustopic=/smart_cam/status
+mqttlabelstopic=/smart_cam/labels
+mqttdetections=/smart_cam/detections
+
+#set http server parameters (to serve detections), 
+#use: http://<ip>:8080/test.jpg - responds only to GET requests (new detection needs browser refresh)
+hostip=<smart_cam IP>
+hostport=8080
+```
+
+### Home Assistant integration
+
+Using [Home Assintant](https://www.home-assistant.io/) as IOT platform, easy integration is avavilable for both solutions. After integration, a live stream of detections is provided.
+
+#### Integrating the http server
+
+In the configuration.yaml file add the followings:
+```
+camera:
+  - platform: generic
+    still_image_url: http://<smart cam IP>:<smart cam port>/test.jpg
+    stream_source: http://<smart cam IP>:<smart cam port>/test.jpg
+```
+On hte home assistant graphical interface add Picture Entity Card Configuration with the following settings:
+<p align="center"> 
+<img src="./images/generic_cam.png" alt="400" width="400"></a>
+</p>
+
+#### Integrating the mqtt client
+
+In the configuration.yaml file add the followings:
+```
+sensor:
+  - platform: mqtt
+    name: "smart_sensor"
+    state_topic: "/smart_cam/labels"
+    availibility_topic: "/smart_cam/status"
+    payload_available: "ON"
+    payload_not_available: "OFF"
+```
+and
+```
+camera:
+  - platform: mptt
+    topic: /smart_cam/detections
+    name: smart_cam
+```
+Usa a Picture Glance Card Configuration with the following settings:
+<p align="center"> 
+<img src="./images/mqtt_cam.png" alt="400" width="400"></a>
+</p>
 
 ## Resurces
 

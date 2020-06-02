@@ -75,7 +75,7 @@ class clFileProcessor():
         '''
 
         # config file schema format
-        cdict = {'url':[], 'user':[],'password':[], 'blacklist':[], 'net':[], 'weights':[],'target':[],'savedetections':[],'saveraw':[],'showinfo':[],'netw':[],'neth':[]}
+        cdict = {'url':[], 'user':[],'password':[], 'blacklist':[], 'net':[], 'weights':[],'target':[],'savedetections':[],'saveraw':[],'showinfo':[],'netw':[],'neth':[],'mqttbroker':[],'mqttport':[],'mqttstatustopic':[],'mqttdetections':[],'hostip':[],'hostport':[],'mqttlabelstopic':[]}
 
         # load file
         ll = self.LoadList(file)
@@ -104,6 +104,7 @@ class clIpCamera():
     def __init__(self, cam=None):
         self.cam = None
         self.camid = None
+        self.img = ""
 
         if cam != None:
             # create cam instance
@@ -129,6 +130,12 @@ class clIpCamera():
                 if type (img) != None:
                     frame = img
 
+            elif self.img != "":
+                #process an image
+                img = cv2.imread(self.img)
+
+                if type (img) != None:
+                    frame = img
             else:
                 # process IP cams
                 img = requests.get(str(url), auth=HTTPBasicAuth(str(usr), str(passw))).content
@@ -139,7 +146,11 @@ class clIpCamera():
         except:
             print ("Check access credentials...")
 
-        frame = cv2.resize(frame, imgsize)
+        # error handling
+        if frame is not None:
+            frame = cv2.resize(frame, imgsize)
+        else:
+            frame = np.zeros((imgsize[0], imgsize[1], 3), dtype=np.uint8)
 
         return  frame
 
@@ -164,6 +175,7 @@ class clDetectionProcessor():
 
         dtStr = ""
         labelStr = ""
+        isdetection = False
 
         # process results
         for detection in dnnOut.reshape(-1, 7):
@@ -195,7 +207,7 @@ class clDetectionProcessor():
 
                     # draw boxes and markers
                     cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color=(0, 255, 0))
-                    cv2.rectangle(frame, (xmin, ymin), (xmin + 80, ymin+15), color=(0, 255, 0), thickness=cv2.FILLED)
+                    cv2.rectangle(frame, (xmin, ymin), (xmin + 100, ymin+15), color=(0, 255, 0), thickness=cv2.FILLED)
                     labelStr = classLabel + "," + str("{0:.2f}".format(confidence))
                     cv2.putText(frame, labelStr, (int(xmin), int(ymin + 11)), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0),1)
 
@@ -205,8 +217,9 @@ class clDetectionProcessor():
 
                     if saveLabeled > 0:
                         cv2.imwrite('./detections/' + dtStr + "_an" + '.jpg', frame)
+                    isdetection = True
 
-        return dtStr,labelStr,frame
+        return isdetection,dtStr,labelStr
 
 def main():
 
@@ -219,6 +232,8 @@ def main():
     parser.add_argument('-s', type=int, metavar='showdetections', default=0, choices=[0,1], help='show/ hide detection window [0,1], default=0')
     parser.add_argument('-conf', type=float, metavar='confidence', default=0.8, help='confidence value [0.0 - 1.0], default=0.8')
     parser.add_argument('-si', type=bool, metavar='showcmdinfo', default=False, help='show cmd line info on detection, default=False')
+    parser.add_argument('-img', type=str, metavar='loadimage', default='', help='load an image, provide the path like ./test.jpg')
+    parser.add_argument('-server', type=str, metavar='servdata', default=None, choices=[None, 'http', 'mqtt', 'all'], help='Use the selected server to publish detections [http, mqtt, all], must be configured in config file.')
 
     args = parser.parse_args()
 
@@ -240,6 +255,41 @@ def main():
     netw = int(cff['netw'][0])
     neth = int(cff['neth'][0])
 
+    mqttbroker = cff['mqttbroker'][0]
+    mqttport = int(cff['mqttport'][0])
+    mqttstatustopic = cff['mqttstatustopic'][0]
+    mqttlabelstopic = cff['mqttlabelstopic'][0]
+    mqttdetections = cff['mqttdetections'][0]
+    hostip = cff['hostip'][0]
+    hostport = int(cff['hostport'][0])
+
+
+    #identify the server to use for publishing detections
+    server = args.server
+
+    if server == 'mqtt':
+        # create mqtt connection
+        from postimg import clPostDetections
+        clmqtt = clPostDetections(mqttbroker,mqttport,mqttstatustopic,mqttlabelstopic,mqttdetections)
+
+    elif server == 'http':
+        # create http connection
+        from postimg import clPostDetectionsHttp
+        clhttp = clPostDetectionsHttp(hostip, hostport)
+
+    elif server == 'all':
+        # create http connection
+        from postimg import clPostDetections, clPostDetectionsHttp
+        clhttp = clPostDetectionsHttp(hostip, hostport)
+
+        clmqtt = clPostDetections(mqttbroker, mqttport, mqttstatustopic, mqttlabelstopic, mqttdetections)
+
+    else:
+        # Server is None, do nothing
+        if args.si == True:
+            print("No server selected...images will not be published")
+
+
     # load labels, if file available
     if args.l:
         labels = fp.LoadList(args.l)
@@ -257,34 +307,66 @@ def main():
     # image processor
     imgProcessor = clDetectionProcessor(args.conf)
 
-    while True:
-        count = 0
+    try:
+        while True:
+            count = 0
 
-        # prepare for camera usage only
-        if args.cam != None: urls =[""]
+            #prepare for camera usage only
+            if args.cam != None: urls =[""]
 
-        for url in urls:
+            if args.img != "":
+                urls = [""]
+                ipcam.img = args.img
 
-            # get camera picture
-            img = ipcam.Retrive(url,usr,passw)
+            for url in urls:
 
-            out = dnn.inference(img)
+                # get camera picture
+                img = ipcam.Retrive(url,usr,passw)
 
-            imgProcessor.Process(img,out,labels,blacklist,count,sdet,sraw,sinfo)
+                out = dnn.inference(img)
 
-            # test if system can display windows
-            if 'DISPLAY' in os.environ and args.s:
-                cv2.namedWindow("Detections")
-                cv2.moveWindow("Detections", 20, 20)
-                cv2.imshow("Detections",img)
+                isdetection, _, labelstr = imgProcessor.Process(img,out,labels,blacklist,count,sdet,sraw,sinfo)
 
-            k = cv2.waitKey(1)
-            if k == ord('q'):
-                # release cam
-                cv2.destroyAllWindows()
-                quit()
+                #if there are detections on the frame, publish it
+                if isdetection:
+                    if server == 'mqtt':
+                        clmqtt.imgPublish(img,labelstr)
+                    elif server == 'http':
+                        clhttp.imgUpdate(img)
+                    elif server == 'all':
+                        #publish on mqtt
+                        clmqtt.imgPublish(img,labelstr)
 
-            count +=1
+                        #publish on http
+                        clhttp.imgUpdate(img)
+                    else:
+                        # no server selected
+                        pass
+
+                # test if system can display windows
+                if 'DISPLAY' in os.environ and args.s:
+                    cv2.namedWindow("Detections")
+                    cv2.moveWindow("Detections", 20, 20)
+                    cv2.imshow("Detections",img)
+
+                k = cv2.waitKey(1)
+                if k == ord('q'):
+                    # release cam
+                    cv2.destroyAllWindows()
+                    quit()
+
+                count +=1
+    except KeyboardInterrupt:
+        #terminate http server
+        print(' Main Thread Keyboard Interrupt received...')
+        if server == 'http':
+            clhttp.terminate()
+        elif server == 'mqtt':
+            clmqtt.terminate()
+        else:
+            clmqtt.terminate()
+            clhttp.terminate()
+
 
 # main loop
 if __name__ == "__main__":
