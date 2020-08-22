@@ -2,7 +2,7 @@
 
 ## About
 
-The project brings the usual IP cameras to the next level, adding deep neuronal networks for object detection and classification, using mobilenet-ssd detector with openvino framework. Works on Raspberry Pi4, using CPU or a NCS 1 compute stick. Suitable for home automatization or IoT applications for smart houses. The implementation works also with attached USB camera, see next section for available commands.
+The project brings the usual IP cameras to the next level, adding deep neuronal networks for object detection and classification, using mobilenet-ssd detector with openvino framework. Works on Raspberry Pi4, using CPU or an NCS 1 compute stick. Suitable for home automatization or IoT applications for smart houses. The implementation works also with the attached USB camera, see the next section for available commands.
 
 <p align="center"> 
 <img src="./images/movie.gif" alt="400" width="400"></a>
@@ -42,9 +42,9 @@ Requirements:
 - Intel TM Movidius Neuronal [Compute Stick](https://software.intel.com/en-us/articles/intel-movidius-neural-compute-stick)
 - (optional) USB3.0 M.2 SSD 
 - 16/32 Gb SSD card
-- Openvino + OpenCV installaion [2019R31](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_raspbian.html#workflow-for-raspberry-pi), note: I had troubles using the latest version (model generated on PC with Model Optimizer was not working on RPi4).
-- (optional) [ncappzoo](https://github.com/movidius/ncappzoo) for additional models and gideline for Model Optimizer installation (MO) on RPi4. The recommandation is to use a PC (instead Rpi4) with Openvino intallation to transform and optimize state-of-the-art models, then deplyoy on RPi4. 
-- To grab the pictures from IP cameras the 'requests' pip package was intalled.
+- Openvino + OpenCV installation [2019R31](https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_raspbian.html#workflow-for-raspberry-pi), note: I had troubles using the latest version (model generated on PC with Model Optimizer was not working on RPi4).
+- (optional) [ncappzoo](https://github.com/movidius/ncappzoo) for additional models and guideline for Model Optimizer installation (MO) on RPi4. The recommendation is to use a PC (instead Rpi4) with Openvino installation to transform and optimize state-of-the-art models, then deploy on RPi4. 
+- To grab the pictures from IP cameras the 'requests' pip package was installed.
 
 <p align="center"> 
 <img src="./images/rpi4ncs.jpg" alt="400" width="400"></a>
@@ -52,7 +52,7 @@ Requirements:
 
 ### Running the application on RPi4 startup
 
-Extra steps are needed on Rpi4 if we want to run the smart_cam application on boot time. The method presented will create a service, which provides easy methos for start / stop / enable the application.
+Extra steps are needed on Rpi4 if we want to run the smart_cam application on boot time. The method presented will create a service, which provides easy methods for start/stop/enable the application.
 
 #### Load openvino environment and smart_cam on boot
 
@@ -66,7 +66,7 @@ Save and make it executable.
 ```
 chmod +x /home/pi/smart_cam/run.sh
 ```
-Please note the absolute paths used in the run script, will not work with relative ones. Info mesages are deactivated (see -s 0 and config file paramentes). Next step is to create the service and enable it.
+Please note the absolute paths used in the run script, will not work with relative ones. Info messages are deactivated (see -s 0 and config file parameters). The next step is to create the service and enable it.
 ```
 sudo nano -w /etc/systemd/system/smart_cam.service
 ```
@@ -103,7 +103,7 @@ sudo systemctl enable smart_cam.service
 
 ## Running on PC
 
-To run on a PC, the above mentioned requirements are valid. Openvino with OpenCV. Here for testing purposes, the 'target' atribut from the configuration file could be settled to 'cpu' mode. USB camera (if atteched), can be invoked easily with the command line parameter.
+To run on a PC, the above-mentioned requirements are valid. Openvino with OpenCV. Here for testing purposes, the 'target' attribute from the configuration file could be settled to 'cpu' mode. USB camera (if attached), can be invoked easily with the command line parameter.
 
 ## IOT integration
 
@@ -111,11 +111,11 @@ Thre are two methods provided to integrate in an IOT system:
 - http server - servs the detections
 - mqtt client - sends images to an mqtt broker
 
-Both can work together, the http server is usefull to verify easily the detections, responds to GET requests, so refresh is needed after detections.
-If the chooesen option is the mqtt client, additional package is needed to be intalled. Recommanded is to use the [Paho MQTT Python Client](http://www.steves-internet-guide.com/into-mqtt-python-client/). The advantage using mqtt, is that additional information is provided beside the picture with detections: 
+Both can work together, the http server is useful to verify easily the detections, response to GET requests, so refresh is needed after detections.
+If the chosen option is the mqtt client, an additional package is needed to be installed. Recommended is to use the [Paho MQTT Python Client](http://www.steves-internet-guide.com/into-mqtt-python-client/). The advantage of using mqtt, is that additional information is provided beside the picture with detections: 
 - status - indicates if the sensor is alive
-- labels - detection and detection accuracy is available in a string format - provideing more posibilities to filter the topic of interest
-- picture with detection (same as with http solution)
+- labels - detection and detection accuracy is available in a string format - providing more possibilities to filter the topic of interest
+- a picture with detection (same as with http solution)
 
 Before use this features, additional configuration si needed in the config.txt file:
 ```
@@ -134,11 +134,11 @@ hostport=8080
 
 ### Home Assistant integration
 
-Using [Home Assintant](https://www.home-assistant.io/) as IOT platform, easy integration is avavilable for both solutions. After integration, a live stream of detections is provided.
+Using [Home Assintant](https://www.home-assistant.io/) as IOT platform, easy integration is available for both solutions. After integration, a live stream of detections is provided.
 
 #### Integrating the http server
 
-In the configuration.yaml file add the followings:
+In the configuration.yaml file adds the followings:
 ```
 camera:
   - platform: generic
@@ -174,7 +174,7 @@ Usa a Picture Glance Card Configuration with the following settings:
 <img src="./images/mqtt_cam.png" alt="400" width="400"></a>
 </p>
 
-## Resurces
+## Resources
 
 https://docs.openvinotoolkit.org/latest/_docs_install_guides_installing_openvino_raspbian.html#workflow-for-raspberry-pi
 
@@ -184,3 +184,4 @@ https://github.com/chuanqi305/MobileNet-SSD
 
 https://www.raspberrypi.org/documentation/linux/usage/systemd.md
 
+/Enjoy.
